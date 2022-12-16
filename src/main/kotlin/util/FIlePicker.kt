@@ -54,6 +54,7 @@ object FileReader {
     fun generateListForFileOutputStream(filePath: String, map: Map<String, List<String>>): Map<String, List<String>> {
         val staplesDumpFile = FileInputStream(File(filePath))
         val result = mutableMapOf<String, MutableList<String>>()
+        val commonPattenResult = mutableMapOf<String, MutableList<String>>()
         val workBook = StreamingReader.builder()
             .rowCacheSize(100) // number of rows to keep in memory (defaults to 10)
             .bufferSize(4096) // buffer size to use when reading InputStream to file (defaults to 1024)
@@ -120,20 +121,34 @@ object FileReader {
         result.size
 
         // common file generator
-//        val commonPattenResult = mutableMapOf<String, MutableList<String>>()
-//
-//        result.forEach {
-//            if (commonPattenResult.containsKey("SP-${it.key.split("SP-").last()}")) {
-//
-//            } else {
-//                val commonKey = "SP-${it.key.split("SP-").last()}"
-//                commonPattenResult[commonKey] = it.value
-//                commonPattenResult[commonKey]?.set(0, "COMMON")
-//                commonPattenResult[commonKey]?.set(1, "COMMON_SECTIONS")
-//                commonPattenResult[commonKey]?.set(3, "")
-//            }
-//        }
 
+        result.forEach {
+            val commonKey = "SP-${it.key.split("SP-").last()}"
+            if (commonPattenResult.containsKey(commonKey) || commonKey == "SP-headers") {
+
+            } else {
+                commonPattenResult.put(commonKey, mutableListOf(
+                    "COMMON",
+                    "COMMON_SECTIONS",
+                    it.value[2],
+                    "",
+                    "",
+                    "OPTIONAL",
+                    it.value[6],
+                    "cnet_common_${it.value[7]}",
+                    "1",
+                    "0",
+                    it.value[10],
+                    it.value[11],
+                    it.value[12]
+                ))
+                println(commonKey)
+            }
+        }
+        println(commonPattenResult)
+        commonPattenResult.forEach {
+            result[it.key] = it.value
+        }
         return result
     }
 }
